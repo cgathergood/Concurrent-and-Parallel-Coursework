@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -362,6 +363,8 @@ void validate(double **a, double *b, double *x, double &norma, double &normx, do
 
 int main(int argc, char **argv)
 {
+	ofstream data("data.csv", ofstream::out);
+
 	// Allocate data on the heap
 	double **a = new double*[SIZE];
 	for (int i = 0; i < SIZE; ++i)
@@ -388,6 +391,9 @@ int main(int argc, char **argv)
 	delete[] b;
 	delete[] x;
 	delete[] ipvt;
+
+	data << "testing" << endl;
+	data.close();
 
 	return 0;
 }
