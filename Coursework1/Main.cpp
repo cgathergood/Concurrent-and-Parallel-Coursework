@@ -384,7 +384,7 @@ int main(int argc, char **argv)
 
 	double result;
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		auto start = system_clock::now();
 
@@ -395,8 +395,8 @@ int main(int argc, char **argv)
 
 		auto end = system_clock::now();
 		auto total = end - start;
-		data << result << ", " << duration_cast<milliseconds>(total).count() << endl;
 		cout << "Time taken = " << duration_cast<milliseconds>(total).count() << endl;
+		data << duration_cast<milliseconds>(total).count() << ", ";
 	}
 
 	// Free the memory
