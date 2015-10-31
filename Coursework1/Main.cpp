@@ -323,7 +323,7 @@ void run(double **a, double *b, int &info, double lda, int n, int *ipvt)
 }
 
 // Validates the result
-void validate(double **a, double *b, double *x, double &norma, double &normx, double &resid, double lda, int n)
+double validate(double **a, double *b, double *x, double &norma, double &normx, double &resid, double lda, int n)
 {
 	double eps, residn;
 	double ref[] = { 6.0, 12.0, 20.0 };
@@ -359,6 +359,7 @@ void validate(double **a, double *b, double *x, double &norma, double &normx, do
 		cout << "Computed Norm Res = " << residn << endl;
 		cout << "Reference Norm Res = " << CHECK_VALUE << endl;
 	}
+	return residn;
 }
 
 int main(int argc, char **argv)
@@ -379,10 +380,16 @@ int main(int argc, char **argv)
 	double resid;
 	int info;
 
+	double result;
+
 	// Main application
-	initialise(a, b, ops, norma, lda);
-	run(a, b, info, lda, SIZE, ipvt);
-	validate(a, b, x, norma, normx, resid, lda, SIZE);
+	for (int i = 0; i < 10; ++i) 
+	{
+		initialise(a, b, ops, norma, lda);
+		run(a, b, info, lda, SIZE, ipvt);
+		result = validate(a, b, x, norma, normx, resid, lda, SIZE);
+		data << result << endl;
+	}
 
 	// Free the memory
 	for (int i = 0; i < SIZE; ++i)
@@ -392,7 +399,6 @@ int main(int argc, char **argv)
 	delete[] x;
 	delete[] ipvt;
 
-	data << "testing" << endl;
 	data.close();
 
 	return 0;
