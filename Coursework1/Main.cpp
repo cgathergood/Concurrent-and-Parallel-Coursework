@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 // Defines the data size to work on
 const unsigned int SIZE = 1000;
@@ -382,13 +384,19 @@ int main(int argc, char **argv)
 
 	double result;
 
-	// Main application
-	for (int i = 0; i < 10; ++i) 
+	for (int i = 0; i < 3; ++i)
 	{
+		auto start = system_clock::now();
+
+		// Main application
 		initialise(a, b, ops, norma, lda);
 		run(a, b, info, lda, SIZE, ipvt);
 		result = validate(a, b, x, norma, normx, resid, lda, SIZE);
-		data << result << endl;
+
+		auto end = system_clock::now();
+		auto total = end - start;
+		data << result << ", " << duration_cast<milliseconds>(total).count() << endl;
+		cout << "Time taken = " << duration_cast<milliseconds>(total).count() << endl;
 	}
 
 	// Free the memory
