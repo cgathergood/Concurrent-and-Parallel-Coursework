@@ -168,6 +168,7 @@ int dgefa(double **a, int lda, int n, int *ipvt)
 				dscal(n - kp1, t, col_k, kp1, 1);
 
 				// Row elimination with column indexing
+#pragma omp parallel for private(col_j,t)
 				for (int j = kp1; j < n; ++j)
 				{
 					// Set pointer for col_j to relevant column in a
@@ -396,7 +397,7 @@ int main(int argc, char **argv)
 	double resid;
 	int info;
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
 		auto start = system_clock::now();
 
@@ -407,7 +408,7 @@ int main(int argc, char **argv)
 
 		auto end = system_clock::now();
 		auto total = end - start;
-		dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
+		cout << duration_cast<milliseconds>(total).count() << endl;
 	}
 
 	// Free the memory
