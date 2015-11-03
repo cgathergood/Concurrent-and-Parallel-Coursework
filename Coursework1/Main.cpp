@@ -320,12 +320,23 @@ void initialise(double **a, double *b, double &ops, double &norma, double lda)
 // Runs the benchmark
 void run(double **a, double *b, int &info, double lda, int n, int *ipvt)
 {
+	auto start = system_clock::now();
+
 	info = dgefa(a, lda, n, ipvt);
+	auto end = system_clock::now();
+	auto total = end - start;
+	cout << "Gaussian Elimination = " << duration_cast<milliseconds>(total).count() << endl;
+
+	start = system_clock::now();
 	dgesl(a, lda, n, ipvt, b, 0);
+	end = system_clock::now();
+	total = end - start;
+	cout << "Solver = " << duration_cast<milliseconds>(total).count() << endl;
+
 }
 
 // Validates the result
-double validate(double **a, double *b, double *x, double &norma, double &normx, double &resid, double lda, int n)
+void validate(double **a, double *b, double *x, double &norma, double &normx, double &resid, double lda, int n)
 {
 	double eps, residn;
 	double ref[] = { 6.0, 12.0, 20.0 };
@@ -361,7 +372,6 @@ double validate(double **a, double *b, double *x, double &norma, double &normx, 
 		cout << "Computed Norm Res = " << residn << endl;
 		cout << "Reference Norm Res = " << CHECK_VALUE << endl;
 	}
-	return residn;
 }
 
 int main(int argc, char **argv)
@@ -382,21 +392,19 @@ int main(int argc, char **argv)
 	double resid;
 	int info;
 
-	double result;
-
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
-		auto start = system_clock::now();
+		//auto start = system_clock::now();
 
 		// Main application
 		initialise(a, b, ops, norma, lda);
 		run(a, b, info, lda, SIZE, ipvt);
-		result = validate(a, b, x, norma, normx, resid, lda, SIZE);
+		validate(a, b, x, norma, normx, resid, lda, SIZE);
 
-		auto end = system_clock::now();
-		auto total = end - start;
-		cout << "Time taken = " << duration_cast<milliseconds>(total).count() << endl;
-		data << duration_cast<milliseconds>(total).count() << ", ";
+		//auto end = system_clock::now();
+		//auto total = end - start;
+		//cout << "Time taken = " << duration_cast<milliseconds>(total).count() << endl;
+		//data << duration_cast<milliseconds>(total).count() << ", ";
 	}
 
 	// Free the memory
