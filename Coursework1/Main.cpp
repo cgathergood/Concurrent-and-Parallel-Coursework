@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <omp.h>
 
 using namespace std;
 using namespace std::chrono;
@@ -325,13 +326,13 @@ void run(double **a, double *b, int &info, double lda, int n, int *ipvt)
 	info = dgefa(a, lda, n, ipvt);
 	auto end = system_clock::now();
 	auto total = end - start;
-	cout << "Gaussian Elimination = " << duration_cast<milliseconds>(total).count() << endl;
+	//cout << "Gaussian Elimination = " << duration_cast<milliseconds>(total).count() << endl;
 
 	start = system_clock::now();
 	dgesl(a, lda, n, ipvt, b, 0);
 	end = system_clock::now();
 	total = end - start;
-	cout << "Solver = " << duration_cast<milliseconds>(total).count() << endl;
+	//cout << "Solver = " << duration_cast<milliseconds>(total).count() << endl;
 
 }
 
@@ -392,19 +393,28 @@ int main(int argc, char **argv)
 	double resid;
 	int info;
 
+	data << "initialise, run, validate" << endl;
+
 	for (int i = 0; i < 1; ++i)
 	{
-		//auto start = system_clock::now();
+		auto start = system_clock::now();
 
 		// Main application
 		initialise(a, b, ops, norma, lda);
-		run(a, b, info, lda, SIZE, ipvt);
-		validate(a, b, x, norma, normx, resid, lda, SIZE);
+		auto end = system_clock::now();
+		auto initTime = end - start;
 
-		//auto end = system_clock::now();
-		//auto total = end - start;
-		//cout << "Time taken = " << duration_cast<milliseconds>(total).count() << endl;
-		//data << duration_cast<milliseconds>(total).count() << ", ";
+		start = system_clock::now();
+		run(a, b, info, lda, SIZE, ipvt);
+		end = system_clock::now();
+		auto runTime = end - start;
+
+		start = system_clock::now();
+		validate(a, b, x, norma, normx, resid, lda, SIZE);
+		end = system_clock::now();
+		auto validateTime = end - start;
+
+		data << duration_cast<milliseconds>(initTime).count() << ", " << duration_cast<milliseconds>(runTime).count() << ", " << duration_cast<milliseconds>(validateTime).count() << endl;
 	}
 
 	// Free the memory
