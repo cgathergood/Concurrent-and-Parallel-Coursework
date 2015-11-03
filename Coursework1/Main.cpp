@@ -323,20 +323,20 @@ void initialise(double **a, double *b, double &ops, double &norma, double lda)
 // Runs the benchmark
 void run(double **a, double *b, int &info, double lda, int n, int *ipvt)
 {
-	auto start = system_clock::now();
+	//auto start = system_clock::now();
 
 	info = dgefa(a, lda, n, ipvt);
-	auto end = system_clock::now();
-	auto gaussianTime = end - start;
+	//auto end = system_clock::now();
+	//auto gaussianTime = end - start;
 	//cout << "Gaussian elimination with partial pivoting = " << duration_cast<milliseconds>(total).count() << endl;
 
-	start = system_clock::now();
+	//start = system_clock::now();
 	dgesl(a, lda, n, ipvt, b, 0);
-	end = system_clock::now();
-	auto solverTime = end - start;
+	//end = system_clock::now();
+	//auto solverTime = end - start;
 	//cout << "Solves the system a * x = b using the factors computed in dgeco or dgefa = " << duration_cast<milliseconds>(total).count() << endl;
 
-	dataFileOutput << duration_cast<milliseconds>(gaussianTime).count() << ", " << duration_cast<milliseconds>(solverTime).count() << endl;
+	//dataFileOutput << duration_cast<milliseconds>(gaussianTime).count() << ", " << duration_cast<milliseconds>(solverTime).count() << endl;
 
 }
 
@@ -396,8 +396,6 @@ int main(int argc, char **argv)
 	double resid;
 	int info;
 
-	dataFileOutput << "gaussian, solver" << endl;
-
 	for (int i = 0; i < 100; ++i)
 	{
 		auto start = system_clock::now();
@@ -406,6 +404,10 @@ int main(int argc, char **argv)
 		initialise(a, b, ops, norma, lda);
 		run(a, b, info, lda, SIZE, ipvt);
 		validate(a, b, x, norma, normx, resid, lda, SIZE);
+
+		auto end = system_clock::now();
+		auto total = end - start;
+		dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 	}
 
 	// Free the memory
