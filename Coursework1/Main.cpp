@@ -11,6 +11,8 @@ const unsigned int SIZE = 1000;
 // Used to validate the result.  This is related to the data size
 const double CHECK_VALUE = 12.0;
 
+ofstream dataFileOutput("data.csv", ofstream::out);
+
 double matgen(double **a, int lda, int n, double *b)
 {
 	double norma = 0.0;
@@ -325,14 +327,16 @@ void run(double **a, double *b, int &info, double lda, int n, int *ipvt)
 
 	info = dgefa(a, lda, n, ipvt);
 	auto end = system_clock::now();
-	auto total = end - start;
-	//cout << "Gaussian Elimination = " << duration_cast<milliseconds>(total).count() << endl;
+	auto gaussianTime = end - start;
+	//cout << "Gaussian elimination with partial pivoting = " << duration_cast<milliseconds>(total).count() << endl;
 
 	start = system_clock::now();
 	dgesl(a, lda, n, ipvt, b, 0);
 	end = system_clock::now();
-	total = end - start;
-	//cout << "Solver = " << duration_cast<milliseconds>(total).count() << endl;
+	auto solverTime = end - start;
+	//cout << "Solves the system a * x = b using the factors computed in dgeco or dgefa = " << duration_cast<milliseconds>(total).count() << endl;
+
+	dataFileOutput << duration_cast<milliseconds>(gaussianTime).count() << ", " << duration_cast<milliseconds>(solverTime).count() << endl;
 
 }
 
@@ -377,7 +381,6 @@ void validate(double **a, double *b, double *x, double &norma, double &normx, do
 
 int main(int argc, char **argv)
 {
-	ofstream data("data.csv", ofstream::out);
 
 	// Allocate data on the heap
 	double **a = new double*[SIZE];
@@ -393,28 +396,16 @@ int main(int argc, char **argv)
 	double resid;
 	int info;
 
-	data << "initialise, run, validate" << endl;
+	dataFileOutput << "gaussian, solver" << endl;
 
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 100; ++i)
 	{
 		auto start = system_clock::now();
 
 		// Main application
 		initialise(a, b, ops, norma, lda);
-		auto end = system_clock::now();
-		auto initTime = end - start;
-
-		start = system_clock::now();
 		run(a, b, info, lda, SIZE, ipvt);
-		end = system_clock::now();
-		auto runTime = end - start;
-
-		start = system_clock::now();
 		validate(a, b, x, norma, normx, resid, lda, SIZE);
-		end = system_clock::now();
-		auto validateTime = end - start;
-
-		data << duration_cast<milliseconds>(initTime).count() << ", " << duration_cast<milliseconds>(runTime).count() << ", " << duration_cast<milliseconds>(validateTime).count() << endl;
 	}
 
 	// Free the memory
@@ -425,7 +416,6 @@ int main(int argc, char **argv)
 	delete[] x;
 	delete[] ipvt;
 
-	data.close();
-
+	dataFileOutput.close();
 	return 0;
 }
