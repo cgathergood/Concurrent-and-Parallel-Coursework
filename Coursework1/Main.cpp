@@ -12,6 +12,7 @@ const unsigned int SIZE = 1000;
 const double CHECK_VALUE = 12.0;
 
 ofstream dataFileOutput("data.csv", ofstream::out);
+int num_threads;
 
 double matgen(double **a, int lda, int n, double *b)
 {
@@ -168,7 +169,7 @@ int dgefa(double **a, int lda, int n, int *ipvt)
 				dscal(n - kp1, t, col_k, kp1, 1);
 
 				// Row elimination with column indexing
-#pragma omp parallel for private(col_j,t)
+#pragma omp parallel for num_threads(num_threads) private(t, col_j)
 				for (int j = kp1; j < n; ++j)
 				{
 					// Set pointer for col_j to relevant column in a
@@ -324,20 +325,20 @@ void initialise(double **a, double *b, double &ops, double &norma, double lda)
 // Runs the benchmark
 void run(double **a, double *b, int &info, double lda, int n, int *ipvt)
 {
-	//auto start = system_clock::now();
+	auto start = system_clock::now();
 
 	info = dgefa(a, lda, n, ipvt);
-	//auto end = system_clock::now();
-	//auto gaussianTime = end - start;
+	auto end = system_clock::now();
+	auto gaussianTime = end - start;
 	//cout << "Gaussian elimination with partial pivoting = " << duration_cast<milliseconds>(total).count() << endl;
 
-	//start = system_clock::now();
+	start = system_clock::now();
 	dgesl(a, lda, n, ipvt, b, 0);
-	//end = system_clock::now();
-	//auto solverTime = end - start;
+	end = system_clock::now();
+	auto solverTime = end - start;
 	//cout << "Solves the system a * x = b using the factors computed in dgeco or dgefa = " << duration_cast<milliseconds>(total).count() << endl;
 
-	//dataFileOutput << duration_cast<milliseconds>(gaussianTime).count() << ", " << duration_cast<milliseconds>(solverTime).count() << endl;
+	dataFileOutput << duration_cast<milliseconds>(gaussianTime).count() << ", " << duration_cast<milliseconds>(solverTime).count() << endl;
 
 }
 
@@ -382,7 +383,7 @@ void validate(double **a, double *b, double *x, double &norma, double &normx, do
 
 int main(int argc, char **argv)
 {
-
+	num_threads = omp_get_num_threads();
 	// Allocate data on the heap
 	double **a = new double*[SIZE];
 	for (int i = 0; i < SIZE; ++i)
@@ -397,7 +398,7 @@ int main(int argc, char **argv)
 	double resid;
 	int info;
 
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
 		auto start = system_clock::now();
 
@@ -408,7 +409,7 @@ int main(int argc, char **argv)
 
 		auto end = system_clock::now();
 		auto total = end - start;
-		cout << duration_cast<milliseconds>(total).count() << endl;
+		//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 	}
 
 	// Free the memory
