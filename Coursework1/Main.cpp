@@ -13,11 +13,11 @@ const unsigned int SIZE = 1000;
 const double CHECK_VALUE = 12.0;
 
 // Number of iterations to run for
-const int iteration_num = 100;
+const int iteration_num = 5;
 // Open data file
-ofstream dataFileOutput("data.csv", ofstream::out);
+//ofstream dataFileOutput("data.csv", ofstream::out);
 // Gets the number of threads
-int num_threads = thread::hardware_concurrency();
+ const int num_threads = thread::hardware_concurrency();
 
 double matgen(double **a, int lda, int n, double *b)
 {
@@ -174,7 +174,7 @@ int dgefa(double **a, int lda, int n, int *ipvt)
 				dscal(n - kp1, t, col_k, kp1, 1);
 
 				// Row elimination with column indexing
-#pragma omp parallel for num_threads(num_threads) private(t, col_j) schedule(dynamic)
+#pragma omp parallel for num_threads(num_threads) private(t, col_j)
 				for (int j = kp1; j < n; ++j)
 				{
 					// Set pointer for col_j to relevant column in a
@@ -402,16 +402,16 @@ int main(int argc, char **argv)
 
 	for (int i = 0; i < iteration_num; ++i)
 	{
-		auto start = system_clock::now();
+		//auto start = system_clock::now();
 
 		// Main application
 		initialise(a, b, ops, norma, lda);
 		run(a, b, info, lda, SIZE, ipvt);
 		validate(a, b, x, norma, normx, resid, lda, SIZE);
 
-		auto end = system_clock::now();
-		auto total = end - start;
-		dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
+		//auto end = system_clock::now();
+		//auto total = end - start;
+		//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 	}
 
 	// Free the memory
@@ -422,6 +422,6 @@ int main(int argc, char **argv)
 	delete[] x;
 	delete[] ipvt;
 
-	dataFileOutput.close();
+	//dataFileOutput.close();
 	return 0;
 }
