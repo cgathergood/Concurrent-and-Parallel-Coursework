@@ -13,11 +13,11 @@ const unsigned int SIZE = 1000;
 const double CHECK_VALUE = 12.0;
 
 // Number of iterations to run for
-const int iteration_num = 5;
+const int iteration_num = 100;
 // Open data file
-//ofstream dataFileOutput("data.csv", ofstream::out);
+ofstream dataFileOutput("data.csv", ofstream::out);
 // Gets the number of threads
- const int num_threads = thread::hardware_concurrency();
+const int num_threads = thread::hardware_concurrency();
 
 double matgen(double **a, int lda, int n, double *b)
 {
@@ -129,6 +129,7 @@ void daxpy(int n, double da, double *dx, int dx_off, int incx, double *dy, int d
 		}
 		else
 		{
+//#pragma omp parallel for num_threads(num_threads)
 			for (int i = 0; i < n; ++i)
 				dy[i + dy_off] += da * dx[i + dx_off];
 		}
@@ -400,18 +401,18 @@ int main(int argc, char **argv)
 	double resid;
 	int info;
 
+	//dataFileOutput << "Initialise ms, Run method ms, Validate method ms" << endl;
 	for (int i = 0; i < iteration_num; ++i)
 	{
-		//auto start = system_clock::now();
+		auto start = system_clock::now();
 
 		// Main application
 		initialise(a, b, ops, norma, lda);
 		run(a, b, info, lda, SIZE, ipvt);
 		validate(a, b, x, norma, normx, resid, lda, SIZE);
-
-		//auto end = system_clock::now();
-		//auto total = end - start;
-		//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
+		auto end = system_clock::now();
+		auto total = end - start;
+		cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << endl;
 	}
 
 	// Free the memory
