@@ -3,6 +3,7 @@
 #include <chrono>
 #include<thread>
 #include <omp.h>
+// NOTE: OpenMP header not needed as it is configured in the project settings
 
 using namespace std;
 using namespace std::chrono;
