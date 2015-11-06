@@ -3,7 +3,6 @@
 #include <chrono>
 #include<thread>
 #include <omp.h>
-// NOTE: OpenMP header not needed as it is configured in the project settings
 
 using namespace std;
 using namespace std::chrono;
@@ -12,10 +11,9 @@ using namespace std::chrono;
 const unsigned int SIZE = 1000;
 // Used to validate the result.  This is related to the data size
 const double CHECK_VALUE = 12.0;
-
 // Number of iterations to run for
 const int iteration_num = 100;
-// Open data file
+// Open data file - change file name depending on outputted data
 ofstream dataFileOutput("data.csv", ofstream::out);
 // Gets the number of threads
 const int num_threads = thread::hardware_concurrency();
@@ -121,6 +119,8 @@ void daxpy(int n, double da, double *dx, int dx_off, int incx, double *dy, int d
 			iy = 0;
 			if (incx < 0) ix = (-n + 1) * incx;
 			if (incy < 0) iy = (-n + 1) * incy;
+// NOTE: include schedule <SCHDEULE_TYPE> to test diffent scheduling methods
+#pragma  omp parallel for num_threads(num_threads)
 			for (int i = 0; i < n; ++i)
 			{
 				dy[iy + dy_off] += da * dx[ix + dx_off];
@@ -130,7 +130,6 @@ void daxpy(int n, double da, double *dx, int dx_off, int incx, double *dy, int d
 		}
 		else
 		{
-//#pragma omp parallel for num_threads(num_threads)
 			for (int i = 0; i < n; ++i)
 				dy[i + dy_off] += da * dx[i + dx_off];
 		}
@@ -332,6 +331,8 @@ void initialise(double **a, double *b, double &ops, double &norma, double lda)
 // Runs the benchmark
 void run(double **a, double *b, int &info, double lda, int n, int *ipvt)
 {
+	// NOTE: Uncomment time variables to record dgefa & dgesl methods
+
 	//auto start = system_clock::now();
 
 	info = dgefa(a, lda, n, ipvt);
@@ -405,15 +406,17 @@ int main(int argc, char **argv)
 	//dataFileOutput << "Initialise ms, Run method ms, Validate method ms" << endl;
 	for (int i = 0; i < iteration_num; ++i)
 	{
-		auto start = system_clock::now();
+		// NOTE: Uncomment variables to record overall time
+
+		//auto start = system_clock::now();
 
 		// Main application
 		initialise(a, b, ops, norma, lda);
 		run(a, b, info, lda, SIZE, ipvt);
 		validate(a, b, x, norma, normx, resid, lda, SIZE);
-		auto end = system_clock::now();
-		auto total = end - start;
-		cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << endl;
+		//auto end = system_clock::now();
+		//auto total = end - start;
+		//cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << endl;
 	}
 
 	// Free the memory
@@ -424,6 +427,6 @@ int main(int argc, char **argv)
 	delete[] x;
 	delete[] ipvt;
 
-	//dataFileOutput.close();
+	dataFileOutput.close();
 	return 0;
 }
