@@ -15,8 +15,6 @@ const double CHECK_VALUE = 12.0;
 const int iteration_num = 100;
 // Open data file - change file name depending on outputted data
 ofstream dataFileOutput("data.csv", ofstream::out);
-// Gets the number of threads
-const int num_threads = thread::hardware_concurrency();
 
 double matgen(double **a, int lda, int n, double *b)
 {
@@ -173,8 +171,6 @@ int dgefa(double **a, int lda, int n, int *ipvt)
 				dscal(n - kp1, t, col_k, kp1, 1);
 
 				// Row elimination with column indexing
-// NOTE: include schedule <SCHDEULE_TYPE> to test diffent scheduling methods
-#pragma omp parallel for num_threads(num_threads) private(t, col_j)
 				for (int j = kp1; j < n; ++j)
 				{
 					// Set pointer for col_j to relevant column in a

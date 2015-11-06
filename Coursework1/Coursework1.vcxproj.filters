@@ -15,6 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Serial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Parallel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Parallel.cpp" />
+    <ClCompile Include="Serial.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4B011C87-D02D-45A7-B404-7C39CF0C5D91}</ProjectGuid>
