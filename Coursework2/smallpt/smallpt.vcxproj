@@ -14,6 +14,7 @@
     <ProjectGuid>{C85194E2-53AB-486A-9150-B955C5C98863}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>smallpt</RootNamespace>
+    <ProjectName>Coursework2</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -80,7 +81,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="smallpt.cpp" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
