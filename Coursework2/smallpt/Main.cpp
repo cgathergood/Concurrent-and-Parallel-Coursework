@@ -1,7 +1,11 @@
 #include <math.h>   // smallpt, a Path Tracer by Kevin Beason, 2008
 #include <stdlib.h> // Make : g++ -O3 -fopenmp smallpt.cpp -o smallpt
 #include <stdio.h>  //        Remove "-fopenmp" for g++ version < 4.2
+#include <iostream>
 #define M_PI 3.1415926535897932384626433832795// *** Added for VS2012
+
+using namespace std;
+
 double erand48(unsigned short seed[3]) {
 	return (double)rand()
 		/ (double)RAND_MAX;
@@ -80,9 +84,13 @@ Vec radiance(const Ray &r, int depth, unsigned short *Xi) {
 		radiance(reflRay, depth, Xi)*Re + radiance(Ray(x, tdir), depth, Xi)*Tr);
 }
 int main(int argc, char *argv[]) {
+	cout << "Main Method" << endl;
 	int w = 1024, h = 768, samps = argc == 2 ? atoi(argv[1]) / 4 : 1; // # samples
 	Ray cam(Vec(50, 52, 295.6), Vec(0, -0.042612, -1).norm()); // cam pos, dir
 	Vec cx = Vec(w*.5135 / h), cy = (cx%cam.d).norm()*.5135, r, *c = new Vec[w*h];
+	//samps = 40;
+	cout << "Starting for loop. samples = " << samps << endl;
+	cout << "h = " << h << endl;
 #pragma omp parallel for schedule(dynamic, 1) private(r)       // OpenMP
 	for (int y = 0; y < h; y++) {                       // Loop over image rows
 	  // *** Commented out for Visual Studio, fprintf is not thread-safe
@@ -101,6 +109,7 @@ int main(int argc, char *argv[]) {
 					c[i] = c[i] + Vec(clamp(r.x), clamp(r.y), clamp(r.z))*.25;
 				}
 	}
+	cout << "for loop completed" << endl;
 	FILE *f = fopen("image.ppm", "w");         // Write image to PPM file.
 	fprintf(f, "P3\n%d %d\n%d\n", w, h, 255);
 	for (int i = 0; i < w*h; i++)
