@@ -1,4 +1,4 @@
-smallpt-cplusplus
+Coursework 2 - Raytracer
 ==============
 
 smallpt: Global Illumination in 99 lines of C++ 
