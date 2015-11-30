@@ -32,27 +32,27 @@ struct Sphere {
 	double intersect(const Ray &r) const { // returns distance, 0 if nohit
 		Vec op = p - r.o; // Solve t^2*d.d + 2*t*(o-p).d + (o-p).(o-p)-R^2 = 0
 		double t, eps = 1e-4, b = op.dot(r.d), det = b*b - op.dot(op) + rad*rad;
-		if (det<0) return 0; else det = sqrt(det);
-		return (t = b - det)>eps ? t : ((t = b + det) > eps ? t : 0);
+		if (det < 0) return 0; else det = sqrt(det);
+		return (t = b - det) > eps ? t : ((t = b + det) > eps ? t : 0);
 	}
 };
 Sphere spheres[] = {//Scene: radius, position, emission, color, material
-  Sphere(1e5, Vec(1e5 + 1,40.8,81.6), Vec(),Vec(.75,.25,.25),DIFF),//Left
-  Sphere(1e5, Vec(-1e5 + 99,40.8,81.6),Vec(),Vec(.25,.25,.75),DIFF),//Rght
-  Sphere(1e5, Vec(50,40.8, 1e5),     Vec(),Vec(.75,.75,.75),DIFF),//Back
-  Sphere(1e5, Vec(50,40.8,-1e5 + 170), Vec(),Vec(),           DIFF),//Frnt
-  Sphere(1e5, Vec(50, 1e5, 81.6),    Vec(),Vec(.75,.75,.75),DIFF),//Botm
-  Sphere(1e5, Vec(50,-1e5 + 81.6,81.6),Vec(),Vec(.75,.75,.75),DIFF),//Top
-  Sphere(16.5,Vec(27,16.5,47),       Vec(),Vec(1,1,1)*.999, SPEC),//Mirr
-  Sphere(16.5,Vec(73,16.5,78),       Vec(),Vec(1,1,1)*.999, REFR),//Glas
-  Sphere(600, Vec(50,681.6 - .27,81.6),Vec(12,12,12),  Vec(), DIFF) //Lite
+	Sphere(1e5, Vec(1e5 + 1, 40.8, 81.6), Vec(), Vec(.75, .25, .25), DIFF),//Left
+	Sphere(1e5, Vec(-1e5 + 99, 40.8, 81.6), Vec(), Vec(.25, .25, .75), DIFF),//Rght
+	Sphere(1e5, Vec(50, 40.8, 1e5), Vec(), Vec(.75, .75, .75), DIFF),//Back
+	Sphere(1e5, Vec(50, 40.8, -1e5 + 170), Vec(), Vec(), DIFF),//Frnt
+	Sphere(1e5, Vec(50, 1e5, 81.6), Vec(), Vec(.75, .75, .75), DIFF),//Botm
+	Sphere(1e5, Vec(50, -1e5 + 81.6, 81.6), Vec(), Vec(.75, .75, .75), DIFF),//Top
+	Sphere(16.5, Vec(27, 16.5, 47), Vec(), Vec(1, 1, 1)*.999, SPEC),//Mirr
+	Sphere(16.5, Vec(73, 16.5, 78), Vec(), Vec(1, 1, 1)*.999, REFR),//Glas
+	Sphere(600, Vec(50, 681.6 - .27, 81.6), Vec(12, 12, 12), Vec(), DIFF) //Lite
 };
 inline double clamp(double x) { return x < 0 ? 0 : x>1 ? 1 : x; }
 inline int toInt(double x) { return int(pow(clamp(x), 1 / 2.2) * 255 + .5); }
 inline bool intersect(const Ray &r, double &t, int &id) {
 	double n = sizeof(spheres) / sizeof(Sphere), d, inf = t = 1e20;
 	for (int i = int(n); i--;) if ((d = spheres[i].intersect(r)) && d < t) { t = d; id = i; }
-	return t<inf;
+	return t < inf;
 }
 Vec radiance(const Ray &r, int depth, unsigned short *Xi) {
 	double t;                               // distance to intersection
@@ -60,7 +60,7 @@ Vec radiance(const Ray &r, int depth, unsigned short *Xi) {
 	if (!intersect(r, t, id)) return Vec(); // if miss, return black
 	const Sphere &obj = spheres[id];        // the hit object
 	Vec x = r.o + r.d*t, n = (x - obj.p).norm(), nl = n.dot(r.d) < 0 ? n : n*-1, f = obj.c;
-	double p = f.x > f.y && f.x>f.z ? f.x : f.y > f.z ? f.y : f.z; // max refl
+	double p = f.x > f.y && f.x > f.z ? f.x : f.y > f.z ? f.y : f.z; // max refl
 	if (depth > 100) return obj.e; // *** Added to prevent stack overflow
 	if (++depth > 5) if (erand48(Xi) < p) f = f*(1 / p); else return obj.e; //R.R.
 	if (obj.refl == DIFF) {                  // Ideal DIFFUSE reflection
@@ -93,9 +93,9 @@ int main(int argc, char *argv[]) {
 	cout << "h = " << h << endl;
 #pragma omp parallel for schedule(dynamic, 1) private(r)       // OpenMP
 	for (int y = 0; y < h; y++) {                       // Loop over image rows
-	  // *** Commented out for Visual Studio, fprintf is not thread-safe
-	  //fprintf(stderr,"\rRendering (%d spp) %5.2f%%",samps*4,100.*y/(h-1));
-		unsigned short Xi[3] = { 0,0,y*y*y }; // *** Moved outside for VS2012
+		// *** Commented out for Visual Studio, fprintf is not thread-safe
+		//fprintf(stderr,"\rRendering (%d spp) %5.2f%%",samps*4,100.*y/(h-1));
+		unsigned short Xi[3] = { 0, 0, y*y*y }; // *** Moved outside for VS2012
 		for (unsigned short x = 0; x < w; x++)   // Loop cols
 			for (int sy = 0, i = (h - y - 1)*w + x; sy < 2; sy++)     // 2x2 subpixel rows
 				for (int sx = 0; sx < 2; sx++, r = Vec()) {        // 2x2 subpixel cols
