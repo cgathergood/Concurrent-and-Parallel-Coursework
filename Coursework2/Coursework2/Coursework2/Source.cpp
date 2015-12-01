@@ -4,6 +4,8 @@
 #include <fstream>
 #include <chrono>
 #include <math.h>
+#include <omp.h>
+#include <thread>
 
 using namespace std;
 using namespace std::chrono;
@@ -13,6 +15,9 @@ ofstream dataFileOutput("data.csv", ofstream::out);
 
 // Number of bodies
 const int N = 10000;
+
+// Number of threads
+const int num_threads = thread::hardware_concurrency();
 
 const double G = 6.673e-11; // Gravitational Constant
 const double solarmass = 1.98892e30;
@@ -128,6 +133,7 @@ void startTheBodies()
 
 void addForces()
 {
+#pragma omp parallel for num_threads(num_threads), shared(bodies), schedule(dynamic)
 	for (int i = 0; i < N; ++i)
 	{
 		bodies[i] = ResetForce(bodies[i]);
@@ -141,6 +147,7 @@ void addForces()
 	}
 
 	// Loop again, update bodies with timestamp
+#pragma omp parallel for num_threads(num_threads), shared(bodies), schedule(dynamic)
 	for (int i = 0; i < N; ++i)
 	{
 		bodies[i] = Update(bodies[i], 1e11);
