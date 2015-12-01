@@ -19,6 +19,7 @@ const int N = 10000;
 // Number of threads
 const int num_threads = thread::hardware_concurrency();
 
+// N-Body constants
 const double G = 6.673e-11; // Gravitational Constant
 const double solarmass = 1.98892e30;
 const double radiusOfUniverse = 1e18;
@@ -168,5 +169,6 @@ int main()
 	auto end = system_clock::now();
 	auto total = end - start;
 	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << endl;
+	dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 	return 0;
 }
