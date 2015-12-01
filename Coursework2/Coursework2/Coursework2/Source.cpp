@@ -1,10 +1,18 @@
 #define _USE_MATH_DEFINES
 
 #include <iostream>
+#include <fstream>
+#include <chrono>
 #include <math.h>
-using namespace std;
 
-const int N = 1000;
+using namespace std;
+using namespace std::chrono;
+
+// Output file
+ofstream dataFileOutput("data.csv", ofstream::out);
+
+// Number of bodies
+const int N = 10000;
 
 const double G = 6.673e-11; // Gravitational Constant
 const double solarmass = 1.98892e30;
@@ -108,7 +116,7 @@ void startTheBodies()
 		}
 
 		// Calculate mass
-		double mass = solarmass*randomGenerator(0.0, 1.0) * 10 + 1e20;
+		double mass = solarmass*randomGenerator(0.0, 1.0) * + 1e20;
 		// Assign variables to a body struct
 		bodies[i].rx = px;
 		bodies[i].ry = py;
@@ -141,6 +149,7 @@ void addForces()
 
 int main()
 {
+	auto start = system_clock::now();
 	startTheBodies();
 	addForces();
 
@@ -148,5 +157,9 @@ int main()
 	{
 		PrintBody(bodies[i]);
 	}
+
+	auto end = system_clock::now();
+	auto total = end - start;
+	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << endl;
 	return 0;
 }
