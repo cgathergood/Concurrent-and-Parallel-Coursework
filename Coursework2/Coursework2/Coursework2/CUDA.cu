@@ -18,7 +18,7 @@ using namespace std::chrono;
 ofstream dataFileOutput("data.csv", ofstream::out);
 
 // Number of bodies
-const int N = 1000;
+const int N = 100000;
 
 const float solarmass = 1.98892e30f;
 
