@@ -14,7 +14,7 @@ using namespace std::chrono;
 ofstream dataFileOutput("data.csv", ofstream::out);
 
 // Number of bodies
-const int N = 1000;
+const int N = 100;
 
 // N-Body constants
 const double G = 6.673e-11; // Gravitational Constant
@@ -154,6 +154,39 @@ void addForces()
 	}
 }
 
+void drawImage(Body bodies[N])
+{
+	FreeImage_Initialise();
+	FIBITMAP* bitmap = FreeImage_Allocate(250, 250, 24);
+	RGBQUAD color;
+	for (int i = 0; i < N; i++)
+	{
+		cout << round(bodies[i].rx * 250 / 1e30) << "," << round(bodies[i].ry * 250 / 1e30) << endl;
+		color.rgbGreen = 0;
+		color.rgbBlue = 0;
+		color.rgbRed = 255;
+		FreeImage_SetPixelColor(bitmap, round(bodies[i].rx * 250 / 1e30), round(bodies[i].ry * 250 / 1e30), &color);
+	}
+
+	//for (int i = 0; i < width; ++i)
+	//{
+	//	for (int j = 0; j < height; ++j)
+	//	{
+	//		color.rgbBlue = 0;
+	//		color.rgbGreen = static_cast<double>(i) / width * 255.0;
+	//		color.rgbRed = static_cast<double>(i) / height * 255.0;
+	//		FreeImage_SetPixelColor(bitmap, i, j, &color);
+	//	}
+	//}
+
+	if (FreeImage_Save(FIF_PNG, bitmap, "test.png", 0))
+	{
+		cout << "Image successfully saved!" << endl;
+	}
+
+	FreeImage_DeInitialise();
+}
+
 int main()
 {
 	auto start = system_clock::now();
@@ -164,10 +197,7 @@ int main()
 	auto total = end - start;
 	cout << "Number of Bodies = " << N << endl;
 	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
-	for (int i = 0; i < N; i++)
-	{
-		dataFileOutput << PrintBody(bodies[i]);
-	}
+	drawImage(bodies);
 	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
-	return 0;
+	return 0; 
 }
