@@ -4,10 +4,8 @@
 #include <fstream>
 #include <chrono>
 #include <math.h>
-#include <omp.h>
 #include <thread>
 #include <cuda_runtime.h>
-#include <device_launch_parameters.h>
 
 using namespace std;
 using namespace std::chrono;
@@ -180,7 +178,7 @@ int main()
 	auto start = system_clock::now();
 	startTheBodies();
 	addForces();
-
+	 
 	for (int i = 0; i < N; i++)
 	{
 		PrintBody(bodies[i]);
