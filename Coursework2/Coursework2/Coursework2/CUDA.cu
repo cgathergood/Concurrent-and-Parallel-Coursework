@@ -61,6 +61,20 @@ Body ResetForce(Body body)
 	return body;
 }
 
+__global__ void bodyForce(Body *a, Body *b, float dt, int n)
+{
+	int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+	if (i < n)
+	{
+		float Fx = 0.0f; float Fy = 0.0f; float Fz = 0.0f;
+
+		for (int j = 0; j < n; j++)
+		{
+			
+		}
+	}
+}
 // compute the net force acting between the body a and b, and add to the net force acting on a
 Body AddForce(Body a, Body b)
 {
