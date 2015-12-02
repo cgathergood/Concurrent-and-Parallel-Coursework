@@ -6,6 +6,8 @@
 #include <math.h>
 #include <omp.h>
 #include <thread>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 using namespace std;
 using namespace std::chrono;
@@ -157,6 +159,7 @@ void addForces()
 
 int main()
 {
+	cudaSetDevice(0);
 	auto start = system_clock::now();
 	startTheBodies();
 	addForces();
