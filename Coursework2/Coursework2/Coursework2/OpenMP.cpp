@@ -139,6 +139,11 @@ int main()
 	auto end = system_clock::now();
 	auto total = end - start;
 
+	for (int i = 0; i < N; ++i)
+	{
+		PrintBody(bodies[i]);
+	}
+
 	cout << "Number of Bodies = " << N << endl;
 	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
 	dataFileOutput << duration_cast<milliseconds>(total).count() << endl;

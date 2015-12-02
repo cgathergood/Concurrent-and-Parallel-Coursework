@@ -185,7 +185,7 @@ int main()
 	auto gridSize = static_cast<int>(ceil(static_cast<float>(N) / BLOCK_SIZE));
 
 	// Execute the kernel
-	bodyForce <<<gridSize, BLOCK_SIZE >>>(buffer_Device_A, buffer_Device_B, N, dt);
+	bodyForce << <gridSize, BLOCK_SIZE >> >(buffer_Device_A, buffer_Device_B, N, dt);
 
 	// Copy to host
 	cudaMemcpy(buffer_host_B, buffer_Device_B, data_size, cudaMemcpyDeviceToHost);
@@ -193,6 +193,11 @@ int main()
 	// Release device memory
 	cudaFree(buffer_Device_A);
 	cudaFree(buffer_Device_B);
+
+	for (int i = 0; i < N; ++i)
+	{
+		PrintBody(buffer_host_A[i]);
+	}
 
 	// Release host memory
 	free(buffer_host_A);

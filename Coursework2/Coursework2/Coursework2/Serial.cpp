@@ -16,7 +16,7 @@ using namespace std::chrono;
 ofstream dataFileOutput("data.csv", ofstream::out);
 
 // Number of bodies
-const int N = 5000;
+const int N = 5;
 
 const float solarmass = 1.98892e30f;
 
@@ -139,7 +139,12 @@ int main()
 	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
 	dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 
-	FreeImage_Initialise();
+	for (int i = 0; i < N; ++i)
+	{
+		PrintBody(bodies[i]);
+	}
+
+	/*FreeImage_Initialise();
 	FIBITMAP* bitmap = FreeImage_Allocate(800, 600, 24);
 	RGBQUAD color;
 
@@ -159,7 +164,7 @@ int main()
 		cout << "Image successfully saved!" << endl;
 	}
 
-	FreeImage_DeInitialise();
+	FreeImage_DeInitialise();*/
 
 	return 0;
 }
