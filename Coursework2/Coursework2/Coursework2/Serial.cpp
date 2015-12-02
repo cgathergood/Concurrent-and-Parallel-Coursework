@@ -4,6 +4,7 @@
 #include <fstream>
 #include <chrono>
 #include <math.h>
+#include "FreeImage/FreeImage.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -133,10 +134,15 @@ int main()
 	bodyForce(bodies, dt);
 	auto end = system_clock::now();
 	auto total = end - start;
-
+	
 	cout << "Number of Bodies = " << N << endl;
 	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
 	dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
+
+	FreeImage_Initialise();
+	cout << "FreeImage_" << FreeImage_GetVersion() << "\n";
+	cout << FreeImage_GetCopyrightMessage() << "\n\n";
+	FreeImage_DeInitialise();
 
 	return 0;
 }
