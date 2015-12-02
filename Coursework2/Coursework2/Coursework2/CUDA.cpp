@@ -25,7 +25,8 @@ const double solarmass = 1.98892e30;
 const double radiusOfUniverse = 1e18;
 
 // create and initiliase a new body
-struct Body{
+struct Body
+{
 	double rx, ry;//cartesian positions
 	double vx, vy;//velocity components
 	double fx, fy;//force components
@@ -38,10 +39,10 @@ Body bodies[N];
 // update velocity and position using timestamp dt
 Body Update(Body body, double dt)
 {
-	body.vx += dt*body.fx / body.mass;
-	body.vy += dt*body.fy / body.mass;
-	body.rx += dt*body.vx;
-	body.ry += dt*body.vy;
+	body.vx += dt * body.fx / body.mass;
+	body.vy += dt * body.fy / body.mass;
+	body.rx += dt * body.vx;
+	body.ry += dt * body.vy;
 	return body;
 }
 
@@ -50,7 +51,7 @@ double distanceTo(Body a, Body b)
 {
 	double dx = a.rx - b.rx;
 	double dy = a.ry - b.ry;
-	return sqrt(dx*dx + dy*dy);
+	return sqrt(dx * dx + dy * dy);
 }
 
 // set force to 0 for the next iteration
@@ -64,11 +65,11 @@ Body ResetForce(Body body)
 // compute the net force acting between the body a and b, and add to the net force acting on a
 Body AddForce(Body a, Body b)
 {
-	double EPS = 3E4;      // softening parameter (just to avoid infinities)
+	double EPS = 3E4; // softening parameter (just to avoid infinities)
 	double dx = b.rx - a.rx;
 	double dy = b.ry - a.ry;
-	double dist = sqrt(dx*dx + dy*dy);
-	double F = (G * a.mass * b.mass) / (dist*dist + EPS*EPS);
+	double dist = sqrt(dx * dx + dy * dy);
+	double F = (G * a.mass * b.mass) / (dist * dist + EPS * EPS);
 	a.fx += F * dx / dist;
 	a.fy += F * dy / dist;
 	return a;
@@ -81,20 +82,22 @@ void PrintBody(Body body)
 }
 
 // Random number generator
-float randomGenerator(float min, float max){
+float randomGenerator(float min, float max)
+{
 	return ((float(rand()) / float(RAND_MAX)) * (max - min)) + min;
 }
 
 // bodies are initliased in circular orbits around the central mass. This is the physics to do that
 double circlev(double rx, double ry)
 {
-	double r2 = sqrt(rx*rx + ry*ry);
-	double numerator = (6.67e-11)*1e6*solarmass;
+	double r2 = sqrt(rx * rx + ry * ry);
+	double numerator = (6.67e-11) * 1e6 * solarmass;
 	return sqrt(numerator / r2);
 }
 
 // template for the signum function contained within Java's Math library
-template <typename T> int signum(T val)
+template <typename T>
+int signum(T val)
 {
 	return (T(0) < val) - (val < T(0));
 }
@@ -104,14 +107,14 @@ void startTheBodies()
 {
 	for (int i = 0; i < N; ++i)
 	{
-		double px = 1e18*exp(-1.8)*(.5 - randomGenerator(0.0, 1.0));
-		double py = 1e18*exp(-1.8)*(.5 - randomGenerator(0.0, 1.0));
+		double px = 1e18 * exp(-1.8) * (.5 - randomGenerator(0.0, 1.0));
+		double py = 1e18 * exp(-1.8) * (.5 - randomGenerator(0.0, 1.0));
 		double magv = circlev(px, py);
 
 		double absangle = atan(abs(py / px));
 		double thetav = M_PI / 2 - absangle;
-		double vx = -1 * signum(py)*cos(thetav)*magv;
-		double vy = signum(px)*sin(thetav)*magv;
+		double vx = -1 * signum(py) * cos(thetav) * magv;
+		double vy = signum(px) * sin(thetav) * magv;
 
 		// Orientate a random 2D cirular orbit
 		if (randomGenerator(0.0, 1.0) <= 0.5)
@@ -121,7 +124,7 @@ void startTheBodies()
 		}
 
 		// Calculate mass
-		double mass = solarmass*randomGenerator(0.0, 1.0) * + 1e20;
+		double mass = solarmass * randomGenerator(0.0, 1.0) * + 1e20;
 		// Assign variables to a body struct
 		bodies[i].rx = px;
 		bodies[i].ry = py;
@@ -167,7 +170,6 @@ void cudaInfo()
 	cout << "Cores: " << properties.multiProcessorCount << endl;
 	cout << "Memory: " << properties.totalGlobalMem / (1024 * 1024) << "MB" << endl;
 	cout << "Clock Freq: " << properties.clockRate / 1000 << "MHz" << endl;
-
 }
 
 int main()
@@ -177,7 +179,7 @@ int main()
 	auto start = system_clock::now();
 	startTheBodies();
 	addForces();
-	 
+
 	for (int i = 0; i < N; i++)
 	{
 		PrintBody(bodies[i]);
@@ -190,3 +192,4 @@ int main()
 	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 	return 0;
 }
+
