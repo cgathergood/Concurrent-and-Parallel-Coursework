@@ -140,8 +140,25 @@ int main()
 	dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 
 	FreeImage_Initialise();
-	cout << "FreeImage_" << FreeImage_GetVersion() << "\n";
-	cout << FreeImage_GetCopyrightMessage() << "\n\n";
+	FIBITMAP* bitmap = FreeImage_Allocate(800, 600, 24);
+	RGBQUAD color;
+
+	for (int i = 0; i < 800; ++i)
+	{
+		for (int j = 0; j < 600;++j)
+		{
+			color.rgbRed = 0;
+			color.rgbGreen = (double)i / 800 * 255.0;
+			color.rgbBlue = (double)i / 600 * 255.0;
+			FreeImage_SetPixelColor(bitmap, i, j, &color);
+		}
+	}
+
+	if (FreeImage_Save(FIF_PNG, bitmap, "test.png", 0))
+	{
+		cout << "Image successfully saved!" << endl;
+	}
+
 	FreeImage_DeInitialise();
 
 	return 0;
