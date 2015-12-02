@@ -1,7 +1,6 @@
 #define _USE_MATH_DEFINES
 
 #include <iostream>
-#include <fstream>
 #include <chrono>
 #include <math.h>
 
