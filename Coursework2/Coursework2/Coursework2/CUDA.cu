@@ -18,7 +18,7 @@ using namespace std::chrono;
 ofstream dataFileOutput("data.csv", ofstream::out);
 
 // Number of bodies
-const int N = 100000;
+const int N = 5000;
 
 const float solarmass = 1.98892e30f;
 
@@ -130,8 +130,6 @@ void startTheBodies(Body* bodies)
 		bodies[i].vx = vx;
 		bodies[i].vy = vy;
 		bodies[i].mass = mass;
-		//printf("rx: %f, ry: %f, vx: %f, vy:%f, mass:%f \n", bodies[i].rx, bodies[i].ry, bodies[i].vx, bodies[i].vy, bodies[i].mass);
-		PrintBody(bodies[i]);
 	}
 };
 
@@ -147,7 +145,7 @@ void cudaInfo()
 	cout << "CUDA Capability: " << properties.major << "." << properties.minor << endl;
 	cout << "Cores: " << properties.multiProcessorCount << endl;
 	cout << "Memory: " << properties.totalGlobalMem / (1024 * 1024) << "MB" << endl;
-	cout << "Clock Freq: " << properties.clockRate / 1000 << "MHz" << endl;
+	cout << "Clock Freq: " << properties.clockRate / 1000 << "MHz \n" << endl;
 }
 
 int main()
@@ -177,9 +175,10 @@ int main()
 	cudaMalloc(&buffer_Device_A, data_size);
 	cudaMalloc(&buffer_Device_B, data_size);
 
+	auto start = system_clock::now();
+
 	startTheBodies(buffer_host_A);
 
-	auto start = system_clock::now();
 	cudaMemcpy(buffer_Device_A, buffer_host_A, data_size, cudaMemcpyHostToDevice);
 
 	// Number of thread blocks in grid
