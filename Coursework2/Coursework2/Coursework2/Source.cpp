@@ -157,9 +157,26 @@ void addForces()
 	}
 }
 
+void cudaInfo()
+{
+	int device;
+	cudaGetDevice(&device);
+
+	cudaDeviceProp properties;
+	cudaGetDeviceProperties(&properties, device);
+
+	cout << "Name: " << properties.name << endl;
+	cout << "CUDA Capability: " << properties.major << "." << properties.minor << endl;
+	cout << "Cores: " << properties.multiProcessorCount << endl;
+	cout << "Memory: " << properties.totalGlobalMem / (1024 * 1024) << "MB" << endl;
+	cout << "Clock Freq: " << properties.clockRate / 1000 << "MHz" << endl;
+
+}
+
 int main()
 {
 	cudaSetDevice(0);
+	cudaInfo();
 	auto start = system_clock::now();
 	startTheBodies();
 	addForces();
@@ -172,6 +189,6 @@ int main()
 	auto end = system_clock::now();
 	auto total = end - start;
 	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << endl;
-	dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
+	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 	return 0;
 }
