@@ -14,7 +14,7 @@ using namespace std::chrono;
 ofstream dataFileOutput("data.csv", ofstream::out);
 
 // Number of bodies
-const int N = 10000;
+const int N = 20000;
 
 // Number of threads
 const int num_threads = thread::hardware_concurrency();
@@ -110,7 +110,6 @@ void startTheBodies()
 
 		double absangle = atan(abs(py / px));
 		double thetav = M_PI / 2 - absangle;
-		double phiv = randomGenerator(0.0, 1.0)*M_PI;
 		double vx = -1 * signum(py)*cos(thetav)*magv;
 		double vy = signum(px)*sin(thetav)*magv;
 
@@ -186,7 +185,8 @@ int main()
 
 	auto end = system_clock::now();
 	auto total = end - start;
-	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << endl;
+	cout << "Number of Bodies = " << N << endl;
+	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
 	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 	return 0;
 }
