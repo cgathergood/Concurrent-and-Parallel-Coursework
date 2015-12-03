@@ -30,9 +30,6 @@ struct Body
 	double mass;//mass
 };
 
-// Global Bodies
-Body bodies[N];
-
 // convert to string representation formatted nicely
 string PrintBody(Body body)
 {
