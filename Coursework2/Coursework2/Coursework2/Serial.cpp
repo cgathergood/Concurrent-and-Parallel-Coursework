@@ -154,21 +154,29 @@ void addForces()
 	}
 }
 
-void drawImage(Body bodies[N])
+void drawImage(Body bodies[N], int name)
 {
 	FreeImage_Initialise();
 	FIBITMAP* bitmap = FreeImage_Allocate(N*2, N*2, 24);
 	RGBQUAD color;
+
 	for (int i = 0; i < N; i++)
 	{
-		cout << round(bodies[i].rx * 10 / 1e30) << "," << round(bodies[i].ry * 10 / 1e30) << endl;
 		color.rgbGreen = 255;
 		color.rgbBlue = 255;
 		color.rgbRed = 255;
 		FreeImage_SetPixelColor(bitmap, round(bodies[i].rx * 10 / 1e30+N), round(bodies[i].ry * 10 / 1e30+N), &color);
 	}
 
-	if (FreeImage_Save(FIF_PNG, bitmap, "test.png", 0))
+	// Creates a numbered file name
+	stringstream fileName;
+	fileName << name << "test.png";
+	cout << fileName.str() << endl;
+	char file[1024];
+	strcpy(file, fileName.str().c_str());
+
+	// Save the file
+	if (FreeImage_Save(FIF_PNG, bitmap, file, 0))
 	{
 		cout << "Image successfully saved!" << endl;
 	}
@@ -180,13 +188,19 @@ int main()
 {
 	auto start = system_clock::now();
 	startTheBodies();
-	addForces();
+
+	for (int i = 0; i < 10; ++i)
+	{
+		addForces();
+		drawImage(bodies, i);
+	}
+	
 
 	auto end = system_clock::now();
 	auto total = end - start;
 	cout << "Number of Bodies = " << N << endl;
 	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
-	drawImage(bodies);
+	//drawImage(bodies);
 	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 	return 0;
 }
