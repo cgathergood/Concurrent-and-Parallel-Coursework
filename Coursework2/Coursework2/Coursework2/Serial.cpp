@@ -90,7 +90,7 @@ float randomGenerator(float min, float max)
 double circlev(double rx, double ry)
 {
 	double r2 = sqrt(rx * rx + ry * ry);
-	double numerator = (6.67e-11) * 1e6 * solarmass;
+	double numerator = (G) * 1e6 * solarmass;
 	return sqrt(numerator / r2);
 }
 
@@ -116,7 +116,7 @@ void startTheBodies()
 		double vy = signum(px) * sin(thetav) * magv;
 
 		// Orientate a random 2D cirular orbit
-		if (randomGenerator(0.0, 1.0) <= 0.5)
+		if (randomGenerator(0.0, 1.0) <= 0.7)
 		{
 			vx = -vx;
 			vy = -vy;
@@ -189,15 +189,15 @@ int main()
 	auto start = system_clock::now();
 	startTheBodies();
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 30; ++i)
 	{
 		addForces();
-		//if (i%10 == 0)
+		//if (i%5 == 0)
 		//{
-			drawImage(bodies, i);
+		//	drawImage(bodies, i);
 		//}
+		drawImage(bodies, i);
 	}
-	
 
 	auto end = system_clock::now();
 	auto total = end - start;
