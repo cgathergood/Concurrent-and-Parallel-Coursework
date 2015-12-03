@@ -157,7 +157,7 @@ void addForces()
 void drawImage(Body bodies[N])
 {
 	FreeImage_Initialise();
-	FIBITMAP* bitmap = FreeImage_Allocate(N, N, 24);
+	FIBITMAP* bitmap = FreeImage_Allocate(N*2, N*2, 24);
 	RGBQUAD color;
 	for (int i = 0; i < N; i++)
 	{
@@ -165,7 +165,7 @@ void drawImage(Body bodies[N])
 		color.rgbGreen = 255;
 		color.rgbBlue = 255;
 		color.rgbRed = 255;
-		FreeImage_SetPixelColor(bitmap, round(bodies[i].rx * 10 / 1e30), round(bodies[i].ry * 10 / 1e30), &color);
+		FreeImage_SetPixelColor(bitmap, round(bodies[i].rx * 10 / 1e30+N), round(bodies[i].ry * 10 / 1e30+N), &color);
 	}
 
 	if (FreeImage_Save(FIF_PNG, bitmap, "test.png", 0))
