@@ -15,7 +15,7 @@ ofstream dataFileOutput("data.csv", ofstream::out);
 // Number of bodies
 const int N = 100;
 // Number of iterations
-const int iterations = 100;
+const int iterations = 1000;
 
 // N-Body constants
 const float G = 6.673e-11; // Gravitational Constant
@@ -126,6 +126,7 @@ void drawImage(Body bodies[N], int name)
 
 int main()
 {
+	srand(time(nullptr));
 	//auto start = system_clock::now();
 	//Time Stamp
 	auto dt = 0.01f;

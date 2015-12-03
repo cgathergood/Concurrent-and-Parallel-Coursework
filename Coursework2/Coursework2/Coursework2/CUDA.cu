@@ -6,21 +6,28 @@
 #include <fstream>
 #include <chrono>
 #include <math.h>
+#include <sstream>
+#include "FreeImage/FreeImage.h"
 
 using namespace std;
 using namespace std::chrono;
 
+// Memory block size
 #define BLOCK_SIZE 1024
+
 #define EPS 3e4f // Softening factor
 #define G 6.673e-11f // Gravitational constant
 
 // Output file
 ofstream dataFileOutput("data.csv", ofstream::out);
-
 // Number of bodies
-const int N = 5000;
+const int N = 100;
+// Number of iterations
+const int iterations = 100;
 
-const float solarmass = 1.98892e30f;
+// N-Body constants
+#define G 6.673e-11f; // Gravitational Constant
+const float radiusOfUniverse = 1000.0f;
 
 // structure of a body (particle)
 struct Body
@@ -37,8 +44,14 @@ void PrintBody(Body body)
 	printf("rx: %f, ry: %f, vx: %f, vy:%f, mass:%f \n", body.rx, body.ry, body.vx, body.vy, body.mass);
 }
 
-// compute the net force acting between the b a and b, and add to the net force acting on a
-__global__ void bodyForce(Body* a, Body* b, int n, float dt)
+// Random number generator
+float randomGenerator(float min, float max)
+{
+	return ((float(rand()) / float(RAND_MAX)) * (max - min)) + min;
+}
+
+// compute the net force acting between bodies
+__global__ void bodyForce(Body* bodies, int n, float dt)
 {
 	// Get block index
 	auto block_idx = blockIdx.x;
@@ -58,78 +71,54 @@ __global__ void bodyForce(Body* a, Body* b, int n, float dt)
 		{
 			if (idx != i)
 			{
-				auto dx = a[i].rx - a[idx].rx;
-				auto dy = a[i].ry - a[idx].ry;
-				auto distance = sqrt(dx * dx + dy * dy);
-
-				auto F = (G * a[idx].mass * a[i].mass) / (distance * distance + EPS * EPS);
-				fx += F * dx / distance;
-				fy += F * dy / distance;
+				// Calcululate new forces
+				auto dx = bodies[i].rx - bodies[idx].rx;
+				auto dy = bodies[i].ry - bodies[idx].ry;
+				auto distsqr = dx * dx + dy * dy + 1e-9f; //softening
+				auto distSixth = distsqr * distsqr;
+				auto invDist = 1.0f / sqrtf(distSixth);
+				auto F = bodies[i].mass * invDist;
+				fx += F * dx;
+				fy += F * dy;
 			}
 		}
-		b[idx].vx += dt * fx / a[idx].mass;
-		b[idx].vy += dt * fy / a[idx].mass;
-		b[idx].rx += dt * a[idx].vx;
-		b[idx].ry += dt * a[idx].vy;
+		bodies[idx].vx += dt * fx;
+		bodies[idx].vy += dt * fy;
 	}
+
 }
 
-// Random number generator
-float randomGenerator(float min, float max)
-{
-	return ((float(rand()) / float(RAND_MAX)) * (max - min)) + min;
-}
+// Calculate new position (based on new velocity)
+__global__ void calculatePosition(Body *a, int n, float dt){
 
-// bodies are initliased in circular orbits around the central mass. This is the physics to do that
-float circlev(float rx, float ry)
-{
-	auto r2 = sqrt(rx * rx + ry * ry);
-	float numerator = (6.67e-11) * 1e6 * solarmass;
-	return sqrt(numerator / r2);
-}
+	// Get block index
+	auto block_idx = blockIdx.x;
+	// Get thread index
+	auto thread_idx = threadIdx.x;
+	// Get the number of threads per block
+	auto block_dim = blockDim.x;
+	// Get the thread's unique ID
+	auto idx = (block_idx * block_dim) + thread_idx;
 
-// template for the signum function contained within Java's Math library
-template <typename T>
-int signum(T val)
-{
-	return (T(0) < val) - (val < T(0));
+	if (idx < n){
+		a[idx].rx += a[idx].vx * dt;
+		a[idx].ry += a[idx].vy * dt;
+	}
 }
 
 // Initialise N bodies with random positions and circular velocities
 void startTheBodies(Body* bodies)
 {
-	bodies[0].rx = 0.0f;
-	bodies[0].ry = 0.0f;
-	bodies[0].vx = 0.0f;
-	bodies[0].vy = 0.0f;
-	bodies[0].mass = solarmass;
-
 	for (auto i = 0; i < N; ++i)
 	{
-		float px = 1e18 * exp(-1.8) * (.5 - randomGenerator(0.0, 1.0));
-		float py = 1e18 * exp(-1.8) * (.5 - randomGenerator(0.0, 1.0));
-		auto magv = circlev(px, py);
-
-		auto absangle = atan(abs(py / px));
-		float thetav = M_PI / 2 - absangle;
-		auto vx = -1 * signum(py) * cos(thetav) * magv;
-		auto vy = signum(px) * sin(thetav) * magv;
-
-		// Orientate a random 2D cirular orbit
-		if (randomGenerator(0.0, 1.0) <= 0.5)
-		{
-			vx = -vx;
-			vy = -vy;
-		}
-
-		// Calculate mass
-		float mass = solarmass * randomGenerator(0.0, 1.0) * 10 + 1e20;
-		// Assign variables to a body struct
+		auto px = randomGenerator(0, radiusOfUniverse);
+		auto py = randomGenerator(0, radiusOfUniverse);
+		auto m = randomGenerator(0, 10e4);
 		bodies[i].rx = px;
 		bodies[i].ry = py;
-		bodies[i].vx = vx;
-		bodies[i].vy = vy;
-		bodies[i].mass = mass;
+		bodies[i].vx = 0.0f;
+		bodies[i].vy = 0.0f;
+		bodies[i].mass = m;
 	}
 };
 
@@ -148,66 +137,97 @@ void cudaInfo()
 	cout << "Clock Freq: " << properties.clockRate / 1000 << "MHz \n" << endl;
 }
 
+void drawImage(Body bodies[N], int name)
+{
+	FreeImage_Initialise();
+	auto bitmap = FreeImage_Allocate(radiusOfUniverse, radiusOfUniverse, 24);
+	RGBQUAD color;
+
+	for (auto i = 0; i < N; i++)
+	{
+		color.rgbGreen = 255;
+		color.rgbBlue = 255;
+		color.rgbRed = 255;
+		FreeImage_SetPixelColor(bitmap, bodies[i].rx, bodies[i].ry, &color);
+	}
+
+	// Creates a numbered file name
+	stringstream fileName;
+	fileName << name << "test.png";
+	char file[1024];
+	strcpy(file, fileName.str().c_str());
+
+	// Save the file
+	if (FreeImage_Save(FIF_PNG, bitmap, file, 0))
+	{
+		cout << "Image saved - " << fileName.str() << endl;
+	}
+
+	FreeImage_DeInitialise();
+}
+
 int main()
 {
+	// Random Seed
+	srand(time(nullptr));
+
 	// Initialise CUDA - select device
 	cudaSetDevice(0);
 	cudaInfo();
 
+	// Timestamp
 	auto dt = 0.01f;
 
-	// Host Buffers
+	// Host Buffer
 	Body* buffer_host_A;
-	Body* buffer_host_B;
 
-	// Device Buffers
+	// Device Buffer
 	Body* buffer_Device_A;
-	Body* buffer_Device_B;
 
 	// host memory size
 	auto data_size = sizeof(Body) * N;
 
 	// Allocate memory for each struct on host
 	buffer_host_A = static_cast<Body*>(malloc(data_size));
-	buffer_host_B = static_cast<Body*>(malloc(data_size));
 
 	// Allocate memory for each struct on GPU
 	cudaMalloc(&buffer_Device_A, data_size);
-	cudaMalloc(&buffer_Device_B, data_size);
-
-	auto start = system_clock::now();
-
-	startTheBodies(buffer_host_A);
-
-	cudaMemcpy(buffer_Device_A, buffer_host_A, data_size, cudaMemcpyHostToDevice);
 
 	// Number of thread blocks in grid
 	auto gridSize = static_cast<int>(ceil(static_cast<float>(N) / BLOCK_SIZE));
 
-	// Execute the kernel
-	bodyForce << <gridSize, BLOCK_SIZE >> >(buffer_Device_A, buffer_Device_B, N, dt);
+	//auto start = system_clock::now();
 
-	// Copy to host
-	cudaMemcpy(buffer_host_B, buffer_Device_B, data_size, cudaMemcpyDeviceToHost);
+	// Initiliase the universe
+	startTheBodies(buffer_host_A);
+	for (auto i = 0; i < iterations; ++i)
+	{
+		cudaMemcpy(buffer_Device_A, buffer_host_A, data_size, cudaMemcpyHostToDevice);
+		// Execute kernels
+		bodyForce << <gridSize, BLOCK_SIZE >> >(buffer_Device_A, N, dt);
+		calculatePosition << <gridSize, BLOCK_SIZE >> >(buffer_Device_A, N, dt);
 
-	// Release device memory
-	cudaFree(buffer_Device_A);
-	cudaFree(buffer_Device_B);
+		// Copy to host
+		cudaMemcpy(buffer_host_A, buffer_Device_A, data_size, cudaMemcpyDeviceToHost);
 
-	for (int i = 0; i < N; ++i)
+		drawImage(buffer_host_A, i);
+	}
+	
+	for (auto i = 0; i < N; ++i)
 	{
 		PrintBody(buffer_host_A[i]);
 	}
 
+	// Release device memory
+	cudaFree(buffer_Device_A);
+
 	// Release host memory
 	free(buffer_host_A);
-	free(buffer_host_B);
-
-	auto end = system_clock::now();
-	auto total = end - start;
-	cout << "Number of Bodies = " << N << endl;
-	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
-	dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
+	//auto end = system_clock::now();
+	//auto total = end - start;
+	//cout << "Number of Bodies = " << N << endl;
+	//cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
+	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 
 	return 0;
 }

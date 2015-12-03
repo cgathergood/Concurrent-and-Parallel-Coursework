@@ -132,11 +132,12 @@ void drawImage(Body bodies[N], int name)
 
 int main()
 {
+	srand(time(nullptr));
 	//auto start = system_clock::now();
 	//Time Stamp
 	auto dt = 0.01f;
 	// Collection of bodies (particles)
-	Body* universe = new Body[N];
+	auto universe = new Body[N];
 	// set up simulation
 	startTheBodies(universe);
 	// Iterate and update the forces
