@@ -14,7 +14,7 @@ using namespace std::chrono;
 ofstream dataFileOutput("data.csv", ofstream::out);
 
 // Number of bodies
-const int N = 1000;
+const int N = 4;
 
 // N-Body constants
 const double G = 6.673e-11; // Gravitational Constant
@@ -37,7 +37,7 @@ Body bodies[N];
 string PrintBody(Body body)
 {
 	stringstream ss;
-	ss << "rx:" << body.rx << ", ry:" << body.ry << ", vx:" << body.vx << ", vy:" << body.vy << ", mass:" << body.mass << "\n";
+	ss << "rx:" << body.rx << ", ry:" << body.ry << ", vx:" << body.vx << ", vy:" << body.vy << ", mass:" << body.mass << ", fx:" << body.fx << ", fy:" << body.fy << "\n";
 	return ss.str();
 }
 
@@ -116,14 +116,14 @@ void startTheBodies()
 		double vy = signum(px) * sin(thetav) * magv;
 
 		// Orientate a random 2D cirular orbit
-		if (randomGenerator(0.0, 1.0) <= 0.7)
+		if (randomGenerator(0.0, 1.0) <= 0.5)
 		{
 			vx = -vx;
 			vy = -vy;
 		}
 
 		// Calculate mass
-		double mass = solarmass * randomGenerator(0.0, 1.0) * +1e20;
+		double mass = solarmass * randomGenerator(0.0, 1.0) * 1e20;
 		// Assign variables to a body struct
 		bodies[i].rx = px;
 		bodies[i].ry = py;
@@ -157,15 +157,20 @@ void addForces()
 void drawImage(Body bodies[N], int name)
 {
 	FreeImage_Initialise();
-	FIBITMAP* bitmap = FreeImage_Allocate(N*2, N*2, 24);
+	FIBITMAP* bitmap = FreeImage_Allocate(100*2, 100*2, 24);
 	RGBQUAD color;
 
 	for (int i = 0; i < N; i++)
 	{
+		if (i == 1)
+		{
+			cout << "X:" << round(bodies[i].rx / 1e30 + N) << ", Y:" << round(bodies[i].ry * 10 / 1e30 + N) << endl;
+		}
+
 		color.rgbGreen = 255;
 		color.rgbBlue = 255;
 		color.rgbRed = 255;
-		FreeImage_SetPixelColor(bitmap, round(bodies[i].rx * 10 / 1e30+N), round(bodies[i].ry * 10 / 1e30+N), &color);
+		FreeImage_SetPixelColor(bitmap, round(bodies[i].rx / 1e30+100), round(bodies[i].ry / 1e30+100), &color);
 	}
 
 	// Creates a numbered file name
@@ -189,14 +194,15 @@ int main()
 	auto start = system_clock::now();
 	startTheBodies();
 
-	for (int i = 0; i < 30; ++i)
+	for (int i = 0; i < 400; ++i)
 	{
 		addForces();
-		//if (i%5 == 0)
-		//{
-		//	drawImage(bodies, i);
-		//}
-		drawImage(bodies, i);
+		if (i%20 == 0)
+		{
+			drawImage(bodies, i);
+		}
+		cout << PrintBody(bodies[1]) << endl;
+
 	}
 
 	auto end = system_clock::now();
