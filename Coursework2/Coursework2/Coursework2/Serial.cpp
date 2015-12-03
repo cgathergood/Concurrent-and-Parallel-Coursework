@@ -14,7 +14,7 @@ using namespace std::chrono;
 ofstream dataFileOutput("data.csv", ofstream::out);
 
 // Number of bodies
-const int N = 100;
+const int N = 1000;
 
 // N-Body constants
 const double G = 6.673e-11; // Gravitational Constant
@@ -37,7 +37,7 @@ Body bodies[N];
 string PrintBody(Body body)
 {
 	stringstream ss;
-	ss << "rx:" << body.rx << ", ry:" << body.ry << ", vx:" << body.vx << ", vy:" << body.vy << ", mass:" << body.mass <<"\n";
+	ss << "rx:" << body.rx << ", ry:" << body.ry << ", vx:" << body.vx << ", vy:" << body.vy << ", mass:" << body.mass << "\n";
 	return ss.str();
 }
 
@@ -157,27 +157,16 @@ void addForces()
 void drawImage(Body bodies[N])
 {
 	FreeImage_Initialise();
-	FIBITMAP* bitmap = FreeImage_Allocate(250, 250, 24);
+	FIBITMAP* bitmap = FreeImage_Allocate(N, N, 24);
 	RGBQUAD color;
 	for (int i = 0; i < N; i++)
 	{
-		cout << round(bodies[i].rx * 250 / 1e30) << "," << round(bodies[i].ry * 250 / 1e30) << endl;
+		cout << round(bodies[i].rx * 10 / 1e30) << "," << round(bodies[i].ry * 10 / 1e30) << endl;
 		color.rgbGreen = 0;
 		color.rgbBlue = 0;
 		color.rgbRed = 255;
-		FreeImage_SetPixelColor(bitmap, round(bodies[i].rx * 250 / 1e30), round(bodies[i].ry * 250 / 1e30), &color);
+		FreeImage_SetPixelColor(bitmap, round(bodies[i].rx * 10 / 1e30), round(bodies[i].ry * 10 / 1e30), &color);
 	}
-
-	//for (int i = 0; i < width; ++i)
-	//{
-	//	for (int j = 0; j < height; ++j)
-	//	{
-	//		color.rgbBlue = 0;
-	//		color.rgbGreen = static_cast<double>(i) / width * 255.0;
-	//		color.rgbRed = static_cast<double>(i) / height * 255.0;
-	//		FreeImage_SetPixelColor(bitmap, i, j, &color);
-	//	}
-	//}
 
 	if (FreeImage_Save(FIF_PNG, bitmap, "test.png", 0))
 	{
@@ -199,5 +188,5 @@ int main()
 	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
 	drawImage(bodies);
 	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
-	return 0; 
+	return 0;
 }
