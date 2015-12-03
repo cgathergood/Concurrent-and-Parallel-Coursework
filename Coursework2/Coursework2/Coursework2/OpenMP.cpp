@@ -18,9 +18,9 @@ const int num_threads = thread::hardware_concurrency();
 // Output file
 ofstream dataFileOutput("data.csv", ofstream::out);
 // Number of bodies
-const int N = 100;
+const int N = 1000;
 // Number of iterations
-const int iterations = 100;
+const int iterations = 1000;
 
 // N-Body constants
 const float G = 6.673e-11; // Gravitational Constant
@@ -132,25 +132,27 @@ void drawImage(Body bodies[N], int name)
 
 int main()
 {
+	// Random Seed
 	srand(time(nullptr));
-	//auto start = system_clock::now();
+	
 	//Time Stamp
 	auto dt = 0.01f;
 	// Collection of bodies (particles)
 	auto universe = new Body[N];
+	auto start = system_clock::now();
 	// set up simulation
 	startTheBodies(universe);
 	// Iterate and update the forces
 	for (auto i = 0; i < iterations; ++i)
 	{
 		updateForces(universe, dt);
-		drawImage(universe, i);
+		//drawImage(universe, i);
 	}
 
-	//auto end = system_clock::now();
-	//auto total = end - start;
-	//cout << "Number of Bodies = " << N << endl;
-	//cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
+	auto end = system_clock::now();
+	auto total = end - start;
+	cout << "Number of Bodies = " << N << endl;
+	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
 	//drawImage(bodies);
 	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 	return 0;

@@ -21,13 +21,13 @@ using namespace std::chrono;
 // Output file
 ofstream dataFileOutput("data.csv", ofstream::out);
 // Number of bodies
-const int N = 100;
+const int N = 1000;
 // Number of iterations
-const int iterations = 100;
+const int iterations = 1000;
 
 // N-Body constants
 #define G 6.673e-11f; // Gravitational Constant
-const float radiusOfUniverse = 1000.0f;
+const float radiusOfUniverse = 1000.0f; // observable limit - used for visualisation
 
 // structure of a body (particle)
 struct Body
@@ -196,7 +196,7 @@ int main()
 	// Number of thread blocks in grid
 	auto gridSize = static_cast<int>(ceil(static_cast<float>(N) / BLOCK_SIZE));
 
-	//auto start = system_clock::now();
+	auto start = system_clock::now();
 
 	// Initiliase the universe
 	startTheBodies(buffer_host_A);
@@ -209,24 +209,20 @@ int main()
 
 		// Copy to host
 		cudaMemcpy(buffer_host_A, buffer_Device_A, data_size, cudaMemcpyDeviceToHost);
-
-		drawImage(buffer_host_A, i);
+		//PrintBody(buffer_host_A[i]);
+		//drawImage(buffer_host_A, i);
 	}
 	
-	for (auto i = 0; i < N; ++i)
-	{
-		PrintBody(buffer_host_A[i]);
-	}
-
 	// Release device memory
 	cudaFree(buffer_Device_A);
 
 	// Release host memory
 	free(buffer_host_A);
-	//auto end = system_clock::now();
-	//auto total = end - start;
-	//cout << "Number of Bodies = " << N << endl;
-	//cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
+
+	auto end = system_clock::now();
+	auto total = end - start;
+	cout << "Number of Bodies = " << N << endl;
+	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
 	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 
 	return 0;
