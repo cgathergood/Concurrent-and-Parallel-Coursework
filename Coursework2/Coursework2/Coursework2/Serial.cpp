@@ -189,10 +189,13 @@ int main()
 	auto start = system_clock::now();
 	startTheBodies();
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 100; ++i)
 	{
 		addForces();
-		drawImage(bodies, i);
+		if (i%10 == 0)
+		{
+			drawImage(bodies, i);
+		}
 	}
 	
 
