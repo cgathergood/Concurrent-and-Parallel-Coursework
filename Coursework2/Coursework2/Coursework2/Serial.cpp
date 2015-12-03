@@ -162,8 +162,8 @@ void drawImage(Body bodies[N])
 	for (int i = 0; i < N; i++)
 	{
 		cout << round(bodies[i].rx * 10 / 1e30) << "," << round(bodies[i].ry * 10 / 1e30) << endl;
-		color.rgbGreen = 0;
-		color.rgbBlue = 0;
+		color.rgbGreen = 255;
+		color.rgbBlue = 255;
 		color.rgbRed = 255;
 		FreeImage_SetPixelColor(bitmap, round(bodies[i].rx * 10 / 1e30), round(bodies[i].ry * 10 / 1e30), &color);
 	}
