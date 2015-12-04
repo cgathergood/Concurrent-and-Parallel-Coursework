@@ -13,7 +13,7 @@ using namespace std::chrono;
 // Output file
 ofstream dataFileOutput("data.csv", ofstream::out);
 // Number of bodies
-const int N =1000;
+const int N = 1000;
 // Number of iterations
 const int iterations = 1000;
 
