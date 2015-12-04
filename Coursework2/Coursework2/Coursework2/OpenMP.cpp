@@ -101,59 +101,62 @@ void updateForces(Body* bodies, float dt)
 	}
 }
 
-void drawImage(Body bodies[N], int name)
-{
-	FreeImage_Initialise();
-	auto bitmap = FreeImage_Allocate(radiusOfUniverse, radiusOfUniverse, 24);
-	RGBQUAD color;
-
-	for (auto i = 0; i < N; i++)
-	{
-		color.rgbGreen = 255;
-		color.rgbBlue = 255;
-		color.rgbRed = 255;
-		FreeImage_SetPixelColor(bitmap, bodies[i].rx, bodies[i].ry, &color);
-	}
-
-	// Creates a numbered file name
-	stringstream fileName;
-	fileName << name << "test.png";
-	char file[1024];
-	strcpy(file, fileName.str().c_str());
-
-	// Save the file
-	if (FreeImage_Save(FIF_PNG, bitmap, file, 0))
-	{
-		cout << "Image saved - " << fileName.str() << endl;
-	}
-
-	FreeImage_DeInitialise();
-}
+//void drawImage(Body bodies[N], int name)
+//{
+//	FreeImage_Initialise();
+//	auto bitmap = FreeImage_Allocate(radiusOfUniverse, radiusOfUniverse, 24);
+//	RGBQUAD color;
+//
+//	for (auto i = 0; i < N; i++)
+//	{
+//		color.rgbGreen = 255;
+//		color.rgbBlue = 255;
+//		color.rgbRed = 255;
+//		FreeImage_SetPixelColor(bitmap, bodies[i].rx, bodies[i].ry, &color);
+//	}
+//
+//	// Creates a numbered file name
+//	stringstream fileName;
+//	fileName << name << "test.png";
+//	char file[1024];
+//	strcpy(file, fileName.str().c_str());
+//
+//	// Save the file
+//	if (FreeImage_Save(FIF_PNG, bitmap, file, 0))
+//	{
+//		cout << "Image saved - " << fileName.str() << endl;
+//	}
+//
+//	FreeImage_DeInitialise();
+//}
 
 int main()
 {
-	// Random Seed
-	srand(time(nullptr));
-	
-	//Time Stamp
-	auto dt = 0.01f;
-	// Collection of bodies (particles)
-	auto universe = new Body[N];
-	auto start = system_clock::now();
-	// set up simulation
-	startTheBodies(universe);
-	// Iterate and update the forces
-	for (auto i = 0; i < iterations; ++i)
+	for (auto testing = 0; testing < 10; ++testing)
 	{
-		updateForces(universe, dt);
-		//drawImage(universe, i);
-	}
+		// Random Seed
+		srand(time(nullptr));
 
-	auto end = system_clock::now();
-	auto total = end - start;
-	cout << "Number of Bodies = " << N << endl;
-	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
-	//drawImage(bodies);
-	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
+		//Time Stamp
+		auto dt = 0.01f;
+		// Collection of bodies (particles)
+		auto universe = new Body[N];
+		auto start = system_clock::now();
+		// set up simulation
+		startTheBodies(universe);
+		// Iterate and update the forces
+		for (auto i = 0; i < iterations; ++i)
+		{
+			updateForces(universe, dt);
+			//drawImage(universe, i);
+		}
+
+		auto end = system_clock::now();
+		auto total = end - start;
+		//cout << "Number of Bodies = " << N << endl;
+		//cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
+		//drawImage(bodies);
+		dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
+	}
 	return 0;
 }

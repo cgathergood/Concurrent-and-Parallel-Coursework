@@ -137,93 +137,95 @@ void cudaInfo()
 	cout << "Clock Freq: " << properties.clockRate / 1000 << "MHz \n" << endl;
 }
 
-void drawImage(Body bodies[N], int name)
-{
-	FreeImage_Initialise();
-	auto bitmap = FreeImage_Allocate(radiusOfUniverse, radiusOfUniverse, 24);
-	RGBQUAD color;
-
-	for (auto i = 0; i < N; i++)
-	{
-		color.rgbGreen = 255;
-		color.rgbBlue = 255;
-		color.rgbRed = 255;
-		FreeImage_SetPixelColor(bitmap, bodies[i].rx, bodies[i].ry, &color);
-	}
-
-	// Creates a numbered file name
-	stringstream fileName;
-	fileName << name << "test.png";
-	char file[1024];
-	strcpy(file, fileName.str().c_str());
-
-	// Save the file
-	if (FreeImage_Save(FIF_PNG, bitmap, file, 0))
-	{
-		cout << "Image saved - " << fileName.str() << endl;
-	}
-
-	FreeImage_DeInitialise();
-}
+//void drawImage(Body bodies[N], int name)
+//{
+//	FreeImage_Initialise();
+//	auto bitmap = FreeImage_Allocate(radiusOfUniverse, radiusOfUniverse, 24);
+//	RGBQUAD color;
+//
+//	for (auto i = 0; i < N; i++)
+//	{
+//		color.rgbGreen = 255;
+//		color.rgbBlue = 255;
+//		color.rgbRed = 255;
+//		FreeImage_SetPixelColor(bitmap, bodies[i].rx, bodies[i].ry, &color);
+//	}
+//
+//	// Creates a numbered file name
+//	stringstream fileName;
+//	fileName << name << "test.png";
+//	char file[1024];
+//	strcpy(file, fileName.str().c_str());
+//
+//	// Save the file
+//	if (FreeImage_Save(FIF_PNG, bitmap, file, 0))
+//	{
+//		cout << "Image saved - " << fileName.str() << endl;
+//	}
+//
+//	FreeImage_DeInitialise();
+//}
 
 int main()
 {
-	// Random Seed
-	srand(time(nullptr));
-
-	// Initialise CUDA - select device
-	cudaSetDevice(0);
-	cudaInfo();
-
-	// Timestamp
-	auto dt = 0.01f;
-
-	// Host Buffer
-	Body* buffer_host_A;
-
-	// Device Buffer
-	Body* buffer_Device_A;
-
-	// host memory size
-	auto data_size = sizeof(Body) * N;
-
-	// Allocate memory for each struct on host
-	buffer_host_A = static_cast<Body*>(malloc(data_size));
-
-	// Allocate memory for each struct on GPU
-	cudaMalloc(&buffer_Device_A, data_size);
-
-	// Number of thread blocks in grid
-	auto gridSize = static_cast<int>(ceil(static_cast<float>(N) / BLOCK_SIZE));
-
-	auto start = system_clock::now();
-
-	// Initiliase the universe
-	startTheBodies(buffer_host_A);
-	for (auto i = 0; i < iterations; ++i)
+	for (auto testing = 0; testing < 10; ++testing)
 	{
-		cudaMemcpy(buffer_Device_A, buffer_host_A, data_size, cudaMemcpyHostToDevice);
-		// Execute kernels
-		bodyForce << <gridSize, BLOCK_SIZE >> >(buffer_Device_A, N, dt);
-		calculatePosition << <gridSize, BLOCK_SIZE >> >(buffer_Device_A, N, dt);
+		// Random Seed
+		srand(time(nullptr));
 
-		// Copy to host
-		cudaMemcpy(buffer_host_A, buffer_Device_A, data_size, cudaMemcpyDeviceToHost);
-		//PrintBody(buffer_host_A[i]);
-		//drawImage(buffer_host_A, i);
+		// Initialise CUDA - select device
+		cudaSetDevice(0);
+		cudaInfo();
+
+		// Timestamp
+		auto dt = 0.01f;
+
+		// Host Buffer
+		Body* buffer_host_A;
+
+		// Device Buffer
+		Body* buffer_Device_A;
+
+		// host memory size
+		auto data_size = sizeof(Body) * N;
+
+		// Allocate memory for each struct on host
+		buffer_host_A = static_cast<Body*>(malloc(data_size));
+
+		// Allocate memory for each struct on GPU
+		cudaMalloc(&buffer_Device_A, data_size);
+
+		// Number of thread blocks in grid
+		auto gridSize = static_cast<int>(ceil(static_cast<float>(N) / BLOCK_SIZE));
+
+		auto start = system_clock::now();
+
+		// Initiliase the universe
+		startTheBodies(buffer_host_A);
+		for (auto i = 0; i < iterations; ++i)
+		{
+			cudaMemcpy(buffer_Device_A, buffer_host_A, data_size, cudaMemcpyHostToDevice);
+			// Execute kernels
+			bodyForce << <gridSize, BLOCK_SIZE >> >(buffer_Device_A, N, dt);
+			calculatePosition << <gridSize, BLOCK_SIZE >> >(buffer_Device_A, N, dt);
+
+			// Copy to host
+			cudaMemcpy(buffer_host_A, buffer_Device_A, data_size, cudaMemcpyDeviceToHost);
+			//PrintBody(buffer_host_A[i]);
+			//drawImage(buffer_host_A, i);
+		}
+
+		// Release device memory
+		cudaFree(buffer_Device_A);
+
+		// Release host memory
+		free(buffer_host_A);
+
+		auto end = system_clock::now();
+		auto total = end - start;
+		//cout << "Number of Bodies = " << N << endl;
+		//cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
+		dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
 	}
-	
-	// Release device memory
-	cudaFree(buffer_Device_A);
-
-	// Release host memory
-	free(buffer_host_A);
-
-	auto end = system_clock::now();
-	auto total = end - start;
-	cout << "Number of Bodies = " << N << endl;
-	cout << "Main Application time = " << duration_cast<milliseconds>(total).count() << "ms" << endl;
-	//dataFileOutput << duration_cast<milliseconds>(total).count() << endl;
-
 	return 0;
 }
