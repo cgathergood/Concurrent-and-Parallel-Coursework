@@ -1,4 +1,4 @@
-Coursework 2 - Raytracer
+Coursework 2 - 2D N-Body Simulation
 ==============
 The aim of this part of the coursework is to implement a serial n-body simulation and improve the overall performance using CPU and GPU techniques.
 
