@@ -7,7 +7,6 @@
 #include <thread>
 #include <omp.h>
 #include <sstream>
-#include "FreeImage/FreeImage.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -18,7 +17,7 @@ const int num_threads = thread::hardware_concurrency();
 // Output file
 ofstream dataFileOutput("data.csv", ofstream::out);
 // Number of bodies
-const int N = 1000;
+const int N = 500;
 // Number of iterations
 const int iterations = 1000;
 
@@ -100,35 +99,6 @@ void updateForces(Body* bodies, float dt)
 		bodies[i].ry += bodies[i].vy * dt;
 	}
 }
-
-//void drawImage(Body bodies[N], int name)
-//{
-//	FreeImage_Initialise();
-//	auto bitmap = FreeImage_Allocate(radiusOfUniverse, radiusOfUniverse, 24);
-//	RGBQUAD color;
-//
-//	for (auto i = 0; i < N; i++)
-//	{
-//		color.rgbGreen = 255;
-//		color.rgbBlue = 255;
-//		color.rgbRed = 255;
-//		FreeImage_SetPixelColor(bitmap, bodies[i].rx, bodies[i].ry, &color);
-//	}
-//
-//	// Creates a numbered file name
-//	stringstream fileName;
-//	fileName << name << "test.png";
-//	char file[1024];
-//	strcpy(file, fileName.str().c_str());
-//
-//	// Save the file
-//	if (FreeImage_Save(FIF_PNG, bitmap, file, 0))
-//	{
-//		cout << "Image saved - " << fileName.str() << endl;
-//	}
-//
-//	FreeImage_DeInitialise();
-//}
 
 int main()
 {

@@ -6,8 +6,6 @@
 #include <fstream>
 #include <chrono>
 #include <math.h>
-#include <sstream>
-#include "FreeImage/FreeImage.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -137,37 +135,9 @@ void cudaInfo()
 	cout << "Clock Freq: " << properties.clockRate / 1000 << "MHz \n" << endl;
 }
 
-//void drawImage(Body bodies[N], int name)
-//{
-//	FreeImage_Initialise();
-//	auto bitmap = FreeImage_Allocate(radiusOfUniverse, radiusOfUniverse, 24);
-//	RGBQUAD color;
-//
-//	for (auto i = 0; i < N; i++)
-//	{
-//		color.rgbGreen = 255;
-//		color.rgbBlue = 255;
-//		color.rgbRed = 255;
-//		FreeImage_SetPixelColor(bitmap, bodies[i].rx, bodies[i].ry, &color);
-//	}
-//
-//	// Creates a numbered file name
-//	stringstream fileName;
-//	fileName << name << "test.png";
-//	char file[1024];
-//	strcpy(file, fileName.str().c_str());
-//
-//	// Save the file
-//	if (FreeImage_Save(FIF_PNG, bitmap, file, 0))
-//	{
-//		cout << "Image saved - " << fileName.str() << endl;
-//	}
-//
-//	FreeImage_DeInitialise();
-//}
-
 int main()
 {
+	cudaInfo();
 	for (auto testing = 0; testing < 10; ++testing)
 	{
 		// Random Seed
@@ -175,7 +145,6 @@ int main()
 
 		// Initialise CUDA - select device
 		cudaSetDevice(0);
-		cudaInfo();
 
 		// Timestamp
 		auto dt = 0.01f;
@@ -204,6 +173,7 @@ int main()
 		startTheBodies(buffer_host_A);
 		for (auto i = 0; i < iterations; ++i)
 		{
+			// Copy from device to host (GPU)
 			cudaMemcpy(buffer_Device_A, buffer_host_A, data_size, cudaMemcpyHostToDevice);
 			// Execute kernels
 			bodyForce << <gridSize, BLOCK_SIZE >> >(buffer_Device_A, N, dt);
@@ -212,7 +182,6 @@ int main()
 			// Copy to host
 			cudaMemcpy(buffer_host_A, buffer_Device_A, data_size, cudaMemcpyDeviceToHost);
 			//PrintBody(buffer_host_A[i]);
-			//drawImage(buffer_host_A, i);
 		}
 
 		// Release device memory
